@@ -38,7 +38,7 @@ substitutions:
     _REGION: us-central1
     # _GCS_BUCKET: ccn-build
     #Developers only change
-    _VERSION: v00
+    _VERSION: v01
     
 # logsBucket: 'gs://$_GCS_BUCKET/cloud_build_downtime_alert_logs'
 # timeout: 1500s
