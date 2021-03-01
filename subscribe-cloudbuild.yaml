@@ -1,0 +1,47 @@
+#######subscribe-service ########
+
+steps:
+#Installing the dependencies
+- name: 'node:10'
+  id: 'gcp-subscribe-build'
+  entrypoint: 'bash'
+  args:
+    - '-c'
+    - |
+      npm install
+      npm run build -c
+  dir: 'subscribe-service/'
+
+#Building Image
+- name: 'gcr.io/cloud-builders/gcloud' 
+  id: 'gcp-subscribe-image'
+  entrypoint: 'bash'
+  args:
+    - '-c'
+    - |
+      gcloud builds submit --tag gcr.io/service-exploration-lab-305311/gcp-pub-sub .
+  waitFor:
+      - 'gcp-subscribe-build'
+  dir: 'subscribe-service/'
+
+# Deploy pushed image to cloud run
+- name: 'gcr.io/cloud-builders/gcloud'
+  id: 'gcp-subscribe-deploy'
+  entrypoint: 'bash'
+  args:
+    - '-c'
+    - |
+      gcloud beta run deploy gcp-subscribe --image=gcr.io/service-exploration-lab-305311/gcp-pub-sub --platform=managed --region=$_REGION --revision-suffix=$_VERSION
+  waitFor:
+    - 'gcp-subscribe-image'
+  dir: 'subscribe-service/'
+  
+substitutions:
+    #GCP Specific configuration. Please don't change anything
+    _REGION: us-central1
+    # _GCS_BUCKET: ccn-build
+    #Developers only change
+    _VERSION: v00
+    
+# logsBucket: 'gs://$_GCS_BUCKET/cloud_build_downtime_alert_logs'
+# timeout: 1500s
